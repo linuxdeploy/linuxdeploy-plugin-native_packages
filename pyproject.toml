@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "linuxdeploy-plugin-native_packages"
+version = "0.0.1"
+description = "Create native distribution packages with linuxdeploy"
+authors = ["TheAssassin <theassassin@assassinate-you.net>"]
+readme = "README.md"
+packages = [{include = "ldnp"}]
+
+[tool.poetry.dependencies]
+# for hashlib.file_digest
+python = "^3.11"
+jinja2 = "^3.1.2"
+pyxdg = "^0.28"
+click = "^8.1.3"
+python-gnupg = "0.5.0"
+
+[tool.poetry.group.dev.dependencies]
+black = {extras = ["d"], version = "^23.3.0"}
+isort = "^5.12.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 120

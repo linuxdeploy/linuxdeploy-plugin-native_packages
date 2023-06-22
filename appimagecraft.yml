@@ -1,0 +1,54 @@
+version: 1
+
+project:
+  name: com.github.linuxdeploy.linuxdeploy-plugin-native-packages
+  version_command: cd "$PROJECT_ROOT" && git rev-parse --short HEAD
+
+build:
+  null:
+
+scripts:
+  post_build:
+    - |2
+      cat > "$BUILD_DIR"/ldnp.desktop <<\EOF
+      [Desktop Entry]
+      Name=ldnp
+      Type=Application
+      Icon=ldnp
+      Exec=ldnp
+      NoDisplay=true
+      Terminal=true
+      Categories=Utility;
+      EOF
+    - |2
+      cat > "$BUILD_DIR"/AppRun.sh <<\EOF
+      #! /bin/bash
+
+      this_dir=$(dirname "$0")
+
+      # add own bin dir as fallback
+      # might come in handy if readelf binary is missing on the system (not sure if that's even possible, though)
+      # also makes using bundled shellcheck easier
+      export PATH="$PATH":"$this_dir"/usr/bin
+
+      "$this_dir"/usr/bin/python -m ldnp "$@"
+      EOF
+    - chmod +x AppRun.sh
+    - touch "$BUILD_DIR"/ldnp.svg
+
+appimage:
+  linuxdeploy:
+    plugins:
+      - conda
+    extra_args:
+      - -i "$BUILD_DIR"/ldnp.svg
+      - -d "$BUILD_DIR"/ldnp.desktop
+      - --custom-apprun "$BUILD_DIR"/AppRun.sh
+      - -e "$(which dpkg)"
+      - -e "$(which rpm)"
+    environment:
+      PIP_REQUIREMENTS: .
+      CONDA_PYTHON_VERSION: 3.11
+    raw_environment:
+      - PIP_WORKDIR="$PROJECT_ROOT"
+      - OUTPUT=linuxdeploy-plugin-native_packages-"$ARCH".AppImage

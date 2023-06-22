@@ -1,0 +1,60 @@
+{# see https://www.debian.org/doc/debian-policy/ch-controlfields.html for more information #}
+
+{# mandatory values #}
+Package: {{ package_name | default("ldnp-unknown") }}
+Version: {{ version | default("0.0.1-1unknown1") }}
+Architecture: {{ architecture | default("amd64") }}
+Maintainer: {{ maintainer_name | default("ldnp user") }} <{{ maintainer_email | default("user@ldnp") }}>
+Description: {{ description | default("ldnp-built package") }}
+
+{# recommended values #}
+Section: {{ section | default("misc") }}
+Priority: {{ priority | default("standard") }}
+
+{# optional values #}
+
+{# we can always calculate the installed size estimation #}
+Installed-Size: {{ installed_size }}
+
+{%- if source %}
+Source: {{ source }}
+{%- endif %}
+{%- if essential %}
+Essential: {{ essential }}
+{%- endif %}
+{%- if depends %}
+Depends: {{ depends }}
+{%- endif %}
+{%- if pre_depends %}
+Pre-Depends: {{ pre_depends }}
+{%- endif %}
+{%- if recommends %}
+Recommends: {{ recommends }}
+{%- endif %}
+{%- if suggests %}
+Suggests: {{ suggests }}
+{%- endif %}
+{%- if breaks %}
+Breaks: {{ breaks }}
+{%- endif %}
+{%- if conflicts %}
+Conflicts: {{ conflicts }}
+{%- endif %}
+{%- if provides %}
+Provides: {{ provides }}
+{%- endif %}
+{%- if source %}
+Source: {{ source }}
+{%- endif %}
+{%- if replaces %}
+Replaces: {{ replaces }}
+{%- endif %}
+{%- if enhances %}
+Enhances: {{ enhances }}
+{%- endif %}
+{%- if homepage %}
+Homepage: {{ homepage }}
+{%- endif %}
+
+{# just some advertising... #}
+Built-Using: linuxdeploy-plugin-native-packaging

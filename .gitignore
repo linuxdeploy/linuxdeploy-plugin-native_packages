@@ -1,0 +1,9 @@
+.idea/
+*AppDir*/
+__pycache__/
+*.py[c|o]
+*.AppImage*
+*.deb
+*.rpm
+squashfs-root*/
+.appimagecraft-build-*/

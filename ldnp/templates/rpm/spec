@@ -1,0 +1,39 @@
+Name:       {{ package_name | default("ldnp-unknown") }}
+Version:    {{ version | default("0.0.1") }}
+Release:    1%{?dist}
+Summary:    {{ short_description | default("ldnp-built package") }}
+
+Group:      System Environment/Base
+License:    GPLv3+
+
+# note: we must _not_ strip these files again, this breaks them beyond repair
+# (in theory, they have been stripped by linuxdeploy already anyway)
+# https://imvoid.wordpress.com/2013/06/05/stripping-and-stopping-stripping-of-binaries-in-rpm-build/
+%global _enable_debug_package 0
+%global debug_package %{nil}
+%global __os_install_post /usr/lib/rpm/brp-compress %{nil}
+
+# prevent RPM from editing Requires: and Provides:
+# this guessing is broken due to the fact that the AppDir contains almost all of the dependencies itself
+AutoReqProv: no
+
+%description
+{{ description | default("ldnp-built package") }}
+
+%prep
+# nothing to do
+true
+
+%build
+# nothing to do either
+true
+
+%install
+# variable is defined during rpmbuild call and points to the temporary install root dir in the context
+cp -rfa %{_install_root}/* %{buildroot}
+
+%files
+# install all the files we just copied
+{%- for file in files %}
+{{ file }}
+{%- endfor %}
