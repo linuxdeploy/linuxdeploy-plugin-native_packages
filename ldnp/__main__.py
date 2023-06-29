@@ -31,15 +31,18 @@ ENV_VAR_PREFIX = "LDNP"
 
 
 @click.command()
+# required to conform with linuxdeploy plugin API
+# click responds to these directly, i.e., parameters required below do not need to be passed, which is quite handy
 @click.version_option("output", "--plugin-type", message="%(version)s", help="Show plugin type and exit.")
 @click.version_option("0", "--plugin-api-version", message="%(version)s", help="Show plugin API version and exit")
+# plugin-specific options
 @click.option(
     "--appdir",
     type=click.Path(file_okay=False, dir_okay=True, resolve_path=True, path_type=Path),
     required=True,
     show_envvar=True,
 )
-@click.option("--build", multiple=True, type=click.Choice(["deb", "rpm"]), show_envvar=True)
+@click.option("--build", multiple=True, type=click.Choice(["deb", "rpm"]), required=True, show_envvar=True)
 @click.option("--sign", is_flag=True, default=False, show_envvar=True)
 @click.option("--gpg-key", default=None, show_envvar=True)
 @click.option("--debug", is_flag=True, default=False, envvar="DEBUG", show_envvar=True)
