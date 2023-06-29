@@ -1,12 +1,16 @@
 import glob
 import os
-import subprocess
 
 from pathlib import Path
 
 from .context import Context
-from .packager import Packager
+from .packager import Packager, AppDir
 from .templating import jinja_env
+from .util import run_command
+from .logging import get_logger
+
+
+logger = get_logger().getChild("deb")
 
 
 class DebPackager(Packager):
@@ -37,13 +41,20 @@ class DebPackager(Packager):
 
         debian_dir = self.context.install_root_dir / "DEBIAN"
         os.makedirs(debian_dir, exist_ok=True)
-        with open(debian_dir / "control", "w") as f:
+
+        control_path = debian_dir / "control"
+        logger.info(f"Generating control file in {control_path}")
+
+        with open(control_path, "w") as f:
             f.write(rendered)
 
-    def generate_deb(self, out_name: str):
-        subprocess.check_call(["dpkg-deb", "-Zxz", "-b", self.context.install_root_dir, out_name])
+    def generate_deb(self, out_path: str):
+        logger.info(f"Generating .deb package called {out_path}")
+        run_command(["dpkg-deb", "-Zxz", "-b", self.context.install_root_dir, out_path])
 
     def create_package(self, out_path: str | os.PathLike):
+        logger.info(f"Creating Debian package called {out_path}")
+
         extension = ".deb"
 
         if not out_path.endswith(extension):
@@ -64,4 +75,4 @@ class DebPackager(Packager):
         # signatures of binary .deb archives
         # we use this tool to sign the packages built by this tool if requested to do so by the user
         # it is at least better than not attaching any signatures or using detached ones
-        subprocess.check_call(["dpkg-sig", "--sign=builder", path, "-k", gpg_key])
+        run_command(["dpkg-sig", "--sign=builder", path, "-k", gpg_key])

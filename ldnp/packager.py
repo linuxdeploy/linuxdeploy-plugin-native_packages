@@ -99,7 +99,7 @@ class Packager:
 
             # we expect a working Exec= entry with a matching binary
             if not usr_bin_path.exists():
-                raise ValueError("binary Exec= entry points to does not exist in AppDir/usr/bin/")
+                raise ValueError("binary Exec= entry points to non-existing binary in AppDir/usr/bin/")
 
             create_relative_symlink(usr_bin_path, bin_dest_dir / exec_binary)
 
