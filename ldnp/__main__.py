@@ -1,5 +1,4 @@
 import os
-import sys
 
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -10,6 +9,7 @@ import click
 from .deb import DebPackager
 from .context import Context
 from .rpm import RpmPackager
+from .logging import set_up_logging
 
 
 def make_packager(build_type: str, appdir_path: str | os.PathLike, context_path: Path):
@@ -42,7 +42,10 @@ ENV_VAR_PREFIX = "LDNP"
 @click.option("--build", multiple=True, type=click.Choice(["deb", "rpm"]), show_envvar=True)
 @click.option("--sign", is_flag=True, default=False, show_envvar=True)
 @click.option("--gpg-key", default=None, show_envvar=True)
-def main(build: Iterable[str], appdir: str | os.PathLike, sign: bool, gpg_key: str):
+@click.option("--debug", is_flag=True, default=False, envvar="DEBUG", show_envvar=True)
+def main(build: Iterable[str], appdir: str | os.PathLike, sign: bool, gpg_key: str, debug: bool):
+    set_up_logging(debug)
+
     for build_type in build:
         with TemporaryDirectory(prefix="ldnp-") as td:
             packager = make_packager(build_type, appdir, Path(td))
