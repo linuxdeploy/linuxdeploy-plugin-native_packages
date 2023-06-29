@@ -22,7 +22,7 @@ class DebPackager(Packager):
         installed_size = sum(
             map(
                 os.path.getsize,
-                glob.glob(str(self.appdir_path) + "/**", recursive=True),
+                glob.glob(str(self.appdir.path) + "/**", recursive=True),
             )
         )
 

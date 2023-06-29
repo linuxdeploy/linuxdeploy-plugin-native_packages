@@ -16,11 +16,26 @@ class AppDir:
     This class contains some utilities to extract information from the AppDir.
     """
 
-    def __init__(self, path: str | os.PathLike):
-        self.path = path
+    DESKTOP_FILES_RELATIVE_LOCATION = "usr/share/applications"
+
+    def __init__(self, path: str | os.PathLike, install_name: str):
+        self.path = Path(path)
+        self.install_name = install_name
+        self.relative_install_path = Path("opt") / install_name
+
+    def find_desktop_files(self) -> Iterable[Path]:
+        rv = glob.glob(
+            str(self.path / "opt" / self.install_name / self.__class__.DESKTOP_FILES_RELATIVE_LOCATION / "*.desktop")
+        )
+        return map(Path, rv)
 
     def root_desktop_file(self) -> DesktopEntry:
-        return NotImplemented
+        desktop_files = glob.glob(str(self.path / "*.desktop"))
+
+        # we don't expect more than a single desktop file at once
+        assert len(desktop_files) == 1
+
+        return DesktopEntry(desktop_files[0])
 
     def guess_package_name(self) -> str:
         return NotImplemented
@@ -31,23 +46,18 @@ class AppDir:
 
 class Packager:
     def __init__(self, appdir_path: str | os.PathLike, context: Context):
-        self.appdir_path = appdir_path
+        self.appdir = AppDir(appdir_path, "package.AppDir")
         self.context: Context = context
 
-        # TODO: make configurable
-        self.appdir_install_name = "package.AppDir"
+        self.appdir_install_path = self.context.install_root_dir / self.appdir.install_name
 
-        # TODO: stuff for super class
-        self.appdir_install_path = self.context.install_root_dir / "opt" / self.appdir_install_name
-        self.desktop_files_relative_location = "usr/share/applications"
-
-    def _find_desktop_files(self) -> Iterable[Path]:
+    def find_desktop_files(self) -> Iterable[Path]:
         rv = glob.glob(
             str(
                 self.context.install_root_dir
                 / "opt"
-                / self.appdir_install_name
-                / self.desktop_files_relative_location
+                / self.appdir.install_name
+                / AppDir.DESKTOP_FILES_RELATIVE_LOCATION
                 / "*.desktop"
             )
         )
@@ -65,13 +75,13 @@ class Packager:
 
         # by default, we install all the desktop files found in AppDir/usr/share/ to the system-wide /usr/share we
         # then look for these apps' Exec= keys and install symlinks to the real binaries within the AppDir to /usr/bin
-        desktop_files_dest_dir = self.context.install_root_dir / self.desktop_files_relative_location
+        desktop_files_dest_dir = self.context.install_root_dir / AppDir.DESKTOP_FILES_RELATIVE_LOCATION
         os.makedirs(desktop_files_dest_dir, exist_ok=True)
 
         bin_dest_dir = self.context.install_root_dir / "usr/bin"
         os.makedirs(bin_dest_dir, exist_ok=True)
 
-        for desktop_file in self._find_desktop_files():
+        for desktop_file in self.find_desktop_files():
             dst = desktop_files_dest_dir / desktop_file.name
             create_relative_symlink(desktop_file, dst)
 
@@ -98,7 +108,7 @@ class Packager:
             shutil.rmtree(self.appdir_install_path)
 
         shutil.copytree(
-            self.appdir_path,
+            self.context.install_root_dir,
             self.appdir_install_path,
             symlinks=True,
             ignore_dangling_symlinks=True,
