@@ -12,11 +12,32 @@ from .context import Context
 
 
 class Packager:
-    def __init__(self, appdir: AppDir, context: Context):
+    def __init__(self, appdir: AppDir, package_name: str, app_name: str, filename_prefix: str, context: Context):
         self.appdir = appdir
         self.context: Context = context
 
         self.appdir_install_path = self.context.install_root_dir / self.appdir.install_name
+
+        # we require these values, so the CLI needs to either demand them from the user or set sane default values
+        # TODO: validate these input values
+        self.package_name = package_name
+        self.app_name = app_name
+        self.filename_prefix = filename_prefix
+
+        # optional values that _can_ but do not have to be set
+        # for these values, we internally provide default values in the templates
+        self.version = None
+        self.description = None
+        self.short_description = None
+
+    def set_version(self, version: str):
+        self.version = version
+
+    def set_description(self, description: str):
+        self.description = description
+
+    def set_short_description(self, short_description: str):
+        self.description = short_description
 
     def find_desktop_files(self) -> Iterable[Path]:
         rv = glob.glob(
@@ -75,8 +96,8 @@ class Packager:
             shutil.rmtree(self.appdir_install_path)
 
         shutil.copytree(
+            self.appdir.path,
             self.context.install_root_dir,
-            self.appdir_install_path,
             symlinks=True,
             ignore_dangling_symlinks=True,
             dirs_exist_ok=True,
@@ -84,8 +105,8 @@ class Packager:
 
     def create_package(self, out_path: str | os.PathLike):
         # to be implemented by subclasses
-        return NotImplemented
+        raise NotImplementedError
 
     def sign_package(self, path: str | os.PathLike, gpg_key: str = None):
         # to be implemented by subclasses
-        return NotImplemented
+        raise NotImplementedError

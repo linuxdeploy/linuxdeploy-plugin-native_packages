@@ -1,5 +1,6 @@
 import glob
 import os
+import shlex
 from pathlib import Path
 from typing import Iterable
 
@@ -34,7 +35,22 @@ class AppDir:
         return DesktopEntry(desktop_files[0])
 
     def guess_package_name(self) -> str:
-        return NotImplemented
+        root_desktop_file = self.root_desktop_file()
+        exec_name = root_desktop_file.getExec()
+        assert exec_name
+        return shlex.split(exec_name)[0]
+
+    def guess_version(self) -> str | None:
+        """
+        Guess version based on version data in desktop file (if available).
+        :returns: None if no version is found, version string otherwise
+        """
+        root_desktop_file = self.root_desktop_file()
+        version = root_desktop_file.get("X-AppImage-Version")
+        return version
 
     def guess_package_maintainer(self) -> str:
-        return NotImplemented
+        raise NotImplementedError
+
+    def guess_package_version(self):
+        raise NotImplementedError

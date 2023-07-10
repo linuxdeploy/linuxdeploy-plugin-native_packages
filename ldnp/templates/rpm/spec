@@ -18,7 +18,7 @@ License:    GPLv3+
 AutoReqProv: no
 
 %description
-{{ description | default("ldnp-built package") }}
+{{ description | default(short_description) | default("ldnp-built package") }}
 
 %prep
 # nothing to do

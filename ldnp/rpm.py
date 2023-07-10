@@ -1,7 +1,6 @@
 import glob
 import os
 import shutil
-import subprocess
 from pathlib import Path
 
 import gnupg
@@ -77,14 +76,24 @@ class RpmPackager(Packager):
 
             files.append(path_to_include)
 
+        metadata = {}
+
+        guessed_version = self.appdir.guess_version()
+        if guessed_version:
+            guessed_version = guessed_version.replace("-", "_")
+            metadata["version"] = guessed_version
+
+        guessed_package_name = self.appdir.guess_package_name()
+        metadata["package_name"] = guessed_package_name
+
         # sorting is technically not needed but makes reading and debugging easier
-        rendered = jinja_env.get_template("rpm/spec").render(files=list(sorted(files)))
+        rendered = jinja_env.get_template("rpm/spec").render(files=list(sorted(files)), **metadata)
 
         with open(self.context.work_dir / "package.spec", "w") as f:
             f.write(rendered)
 
     def generate_rpm(self, out_path: str):
-        subprocess.check_call(
+        run_command(
             [
                 "rpmbuild",
                 "--build-in-place",
@@ -116,7 +125,7 @@ class RpmPackager(Packager):
     def create_package(self, out_path: str | os.PathLike):
         extension = ".rpm"
 
-        if not out_path.endswith(extension):
+        if not str(out_path).endswith(extension):
             out_path = Path(f"{out_path}{extension}")
 
         self.copy_appdir_contents()
@@ -136,6 +145,6 @@ class RpmPackager(Packager):
         if gpg_key is None:
             gpg = gnupg.GPG()
             keys = gpg.list_keys(secret=True)
-            gpg_key = keys[0].keyid
+            gpg_key = keys[0]["keyid"]
 
-        subprocess.check_call(["rpmsign", "--resign", path, "-D", f"_gpg_name {gpg_key}"])
+        run_command(["rpmsign", "--resign", path, "-D", f"_gpg_name {gpg_key}"])

@@ -5,7 +5,7 @@ Package: {{ package_name | default("ldnp-unknown") }}
 Version: {{ version | default("0.0.1-1unknown1") }}
 Architecture: {{ architecture | default("amd64") }}
 Maintainer: {{ maintainer_name | default("ldnp user") }} <{{ maintainer_email | default("user@ldnp") }}>
-Description: {{ description | default("ldnp-built package") }}
+Description: {{ description | default(short_description) | default("ldnp-built package") }}
 
 {# recommended values #}
 Section: {{ section | default("misc") }}

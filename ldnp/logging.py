@@ -21,7 +21,7 @@ def set_up_logging(debug: bool):
     else:
         level = logging.INFO
 
-    fmt = "%(name)s [%(process)s] [%(levelname)s] %(message)s"
+    fmt = "%(name)s [%(levelname)s] %(message)s"
 
     # black levels on a dark terminal background are unreadable
     styles = coloredlogs.DEFAULT_FIELD_STYLES

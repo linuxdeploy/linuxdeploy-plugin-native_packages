@@ -27,8 +27,19 @@ class DebPackager(Packager):
             )
         )
 
+        metadata = {
+            "installed_size": installed_size,
+        }
+
+        guessed_version = self.appdir.guess_version()
+        if guessed_version:
+            metadata["version"] = guessed_version
+
+        guessed_package_name = self.appdir.guess_package_name()
+        metadata["package_name"] = guessed_package_name
+
         # sorting is technically not needed but makes reading and debugging easier
-        rendered = jinja_env.get_template("deb/control").render(installed_size=installed_size)
+        rendered = jinja_env.get_template("deb/control").render(**metadata)
 
         # a binary control file may not contain any empty lines in the main body, but must have a trailing one
         dual_newline = "\n" * 2
@@ -45,6 +56,13 @@ class DebPackager(Packager):
         with open(control_path, "w") as f:
             f.write(rendered)
 
+    def generate_shlibs_file(self):
+        # FIXME: shlibs
+        # # TODO: make shlibs configurable
+        # with open(self.context.work_dir / "shlibs", "w") as f:
+        #     f.write("true")
+        pass
+
     def generate_deb(self, out_path: str):
         logger.info(f"Generating .deb package called {out_path}")
         run_command(["dpkg-deb", "-Zxz", "-b", self.context.install_root_dir, out_path])
@@ -60,6 +78,7 @@ class DebPackager(Packager):
         self.copy_appdir_contents()
         self.copy_data_to_usr()
         self.generate_control_file()
+        self.generate_shlibs_file()
         self.generate_deb(out_path)
 
         return out_path
