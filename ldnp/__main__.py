@@ -6,20 +6,21 @@ from typing import Iterable
 
 import click
 
-from .deb import DebPackager
-from .context import Context
-from .rpm import RpmPackager
 from .logging import set_up_logging
+from .context import Context
+from .appdir import AppDir
+from .deb import DebPackager
+from .rpm import RpmPackager
 
 
-def make_packager(build_type: str, appdir_path: str | os.PathLike, context_path: Path):
+def make_packager(build_type: str, appdir: AppDir, context_path: Path):
     context = Context(context_path)
 
     if build_type == "rpm":
-        packager = RpmPackager(appdir_path, context)
+        packager = RpmPackager(appdir, context)
 
     elif build_type == "deb":
-        packager = DebPackager(appdir_path, context)
+        packager = DebPackager(appdir, context)
 
     else:
         raise KeyError(f"cannot create packager for unknown build type {build_type}")
@@ -49,9 +50,11 @@ ENV_VAR_PREFIX = "LDNP"
 def main(build: Iterable[str], appdir: str | os.PathLike, sign: bool, gpg_key: str, debug: bool):
     set_up_logging(debug)
 
+    appdir_instance = AppDir(appdir, "demo.AppDir")
+
     for build_type in build:
         with TemporaryDirectory(prefix="ldnp-") as td:
-            packager = make_packager(build_type, appdir, Path(td))
+            packager = make_packager(build_type, appdir_instance, Path(td))
 
             out_name = packager.create_package("out")
 

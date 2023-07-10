@@ -43,9 +43,6 @@ class RpmPackager(Packager):
     This class is inspired by CPack's DEB generator code.
     """
 
-    def __init__(self, appdir_path: str | os.PathLike, context: Context):
-        super().__init__(appdir_path, context)
-
     def generate_spec_file(self):
         files_and_directories = list(
             map(Path, glob.glob(str(self.context.install_root_dir / "**"), recursive=True, include_hidden=True))

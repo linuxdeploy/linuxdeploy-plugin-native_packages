@@ -18,9 +18,6 @@ class DebPackager(Packager):
     This class is inspired by CPack's DEB generator code.
     """
 
-    def __init__(self, appdir_path: str | os.PathLike, context: Context):
-        super().__init__(appdir_path, context)
-
     def generate_control_file(self):
         # this key is optional, however it shouldn't be a big deal to calculate the value
         installed_size = sum(
