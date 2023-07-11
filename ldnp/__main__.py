@@ -15,15 +15,15 @@ from .rpm import RpmPackager
 
 
 def make_packager(
-    build_type: str, appdir: AppDir, package_name: str, filename_prefix: str, context_path: Path
+    build_type: str, appdir: AppDir, package_name: str, version: str, filename_prefix: str, context_path: Path
 ):
     context = Context(context_path)
 
     if build_type == "rpm":
-        packager = RpmPackager(appdir, package_name, filename_prefix, context)
+        packager = RpmPackager(appdir, package_name, version, filename_prefix, context)
 
     elif build_type == "deb":
-        packager = DebPackager(appdir, package_name, filename_prefix, context)
+        packager = DebPackager(appdir, package_name, version, filename_prefix, context)
 
     else:
         raise KeyError(f"cannot create packager for unknown build type {build_type}")
@@ -75,39 +75,38 @@ def main(
 
     appdir_instance = AppDir(appdir, "demo.AppDir")
 
+    if app_name and not package_name:
+        logger.info(f"Using user-provided linuxdeploy output app name as package name: {app_name}")
+        package_name = app_name
+    elif package_name:
+        logger.info(f"Using user-provided package name: {package_name}")
+    else:
+        package_name = appdir_instance.guess_package_name()
+
+        if not package_name:
+            logger.critical("No package name provided and guessing failed")
+            sys.exit(2)
+
+        logger.info(f"Guessed package name {package_name}")
+
+    if not filename_prefix:
+        logger.info("Using package name as filename prefix")
+        filename_prefix = package_name
+
+    if not package_version:
+        try:
+            package_version = appdir_instance.guess_package_version()
+        except ValueError:
+            logger.critical("Could not guess version and user did not specify one")
+            sys.exit(2)
+
+    logger.info(f"Package version: {package_version}")
+
     for build_type in build:
         with TemporaryDirectory(prefix="ldnp-") as td:
-            if app_name and not package_name:
-                logger.info(f"Using user-provided linuxdeploy output app name as package name: {app_name}")
-                package_name = app_name
-            elif package_name:
-                logger.info(f"Using user-provided package name: {package_name}")
-            else:
-                package_name = appdir_instance.guess_package_name()
-
-                if not package_name:
-                    logger.critical("No package name provided and guessing failed")
-                    sys.exit(2)
-
-                logger.info(f"Guessed package name {package_name}")
-
-            if not filename_prefix:
-                logger.info("Using package name as filename prefix")
-                filename_prefix = package_name
-
-            packager = make_packager(build_type, appdir_instance, package_name, filename_prefix, Path(td))
-
-            if not package_version:
-                try:
-                    package_version = appdir_instance.guess_package_version()
-                except ValueError:
-                    pass
-
-            if not package_version:
-                logger.warning("Could not guess package version")
-            else:
-                logger.info(f"Package version: {package_version}")
-                packager.set_version(package_version)
+            packager = make_packager(
+                build_type, appdir_instance, package_name, package_version, filename_prefix, Path(td)
+            )
 
             if short_description and not description:
                 logger.warning("No description provided, falling back to short description")
