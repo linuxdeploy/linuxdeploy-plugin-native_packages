@@ -72,7 +72,7 @@ class DebPackager(Packager):
 
         extension = ".deb"
 
-        if not out_path.endswith(extension):
+        if not str(out_path).endswith(extension):
             out_path = Path(f"{out_path}{extension}")
 
         self.copy_appdir_contents()
@@ -91,4 +91,4 @@ class DebPackager(Packager):
         # signatures of binary .deb archives
         # we use this tool to sign the packages built by this tool if requested to do so by the user
         # it is at least better than not attaching any signatures or using detached ones
-        run_command(["dpkg-sig", "--sign=builder", path, "-k", gpg_key])
+        run_command(["dpkg-sig", "--sign=builder", str(path), "-k", gpg_key])

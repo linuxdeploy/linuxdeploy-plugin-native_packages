@@ -135,7 +135,10 @@ def main(
             logger.info(f"Build package {out_path}")
 
             if sign:
+                logger.info(f"Signing package {out_path}")
                 packager.sign_package(out_name, gpg_key)
+
+    logger.info("Done!")
 
 
 main(auto_envvar_prefix=ENV_VAR_PREFIX)
