@@ -27,16 +27,20 @@ class DebPackager(Packager):
             )
         )
 
+        assert self.version
+        assert self.package_name
+
         metadata = {
             "installed_size": installed_size,
+            "version": self.version,
+            "package_name": self.package_name,
         }
 
-        guessed_version = self.appdir.guess_version()
-        if guessed_version:
-            metadata["version"] = guessed_version
+        if self.description:
+            metadata["description"] = self.description
 
-        guessed_package_name = self.appdir.guess_package_name()
-        metadata["package_name"] = guessed_package_name
+        if self.short_description:
+            metadata["short_description"] = self.short_description
 
         # sorting is technically not needed but makes reading and debugging easier
         rendered = jinja_env.get_template("deb/control").render(**metadata)
