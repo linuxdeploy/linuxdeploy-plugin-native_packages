@@ -12,7 +12,7 @@ from .context import Context
 
 
 class Packager:
-    def __init__(self, appdir: AppDir, package_name: str, app_name: str, filename_prefix: str, context: Context):
+    def __init__(self, appdir: AppDir, package_name: str, filename_prefix: str, context: Context):
         self.appdir = appdir
         self.context: Context = context
 
@@ -21,7 +21,6 @@ class Packager:
         # we require these values, so the CLI needs to either demand them from the user or set sane default values
         # TODO: validate these input values
         self.package_name = package_name
-        self.app_name = app_name
         self.filename_prefix = filename_prefix
 
         # optional values that _can_ but do not have to be set
