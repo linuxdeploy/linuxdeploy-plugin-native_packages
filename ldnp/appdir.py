@@ -53,4 +53,11 @@ class AppDir:
         raise NotImplementedError
 
     def guess_package_version(self):
-        raise NotImplementedError
+        # AppDirs which appimagetool already ran on usually provide a version marker which we can recycle
+        root_desktop_file = self.root_desktop_file()
+        x_appimage_version = root_desktop_file.get("X-AppImage-Version")
+
+        if x_appimage_version:
+            return x_appimage_version
+
+        raise ValueError("Could not find version in AppDir")

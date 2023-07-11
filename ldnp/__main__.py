@@ -97,7 +97,10 @@ def main(
             packager = make_packager(build_type, appdir_instance, package_name, app_name, filename_prefix, Path(td))
 
             if not package_version:
-                package_version = appdir_instance.guess_package_version()
+                try:
+                    package_version = appdir_instance.guess_package_version()
+                except ValueError:
+                    pass
 
             if not package_version:
                 logger.warning("Could not guess package version")
