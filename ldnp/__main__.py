@@ -105,6 +105,7 @@ def main(
             if not package_version:
                 logger.warning("Could not guess package version")
             else:
+                logger.info(f"Package version: {package_version}")
                 packager.set_version(package_version)
 
             if short_description and not description:
