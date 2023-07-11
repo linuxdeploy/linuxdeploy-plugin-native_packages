@@ -24,12 +24,12 @@ scripts:
       cat > "$BUILD_DIR"/AppRun.sh <<\EOF
       #! /bin/bash
 
-      this_dir=$(dirname "$0")
+      set -eo pipefail
 
-      # add own bin dir as fallback
-      # might come in handy if readelf binary is missing on the system (not sure if that's even possible, though)
-      # also makes using bundled shellcheck easier
-      export PATH="$PATH":"$this_dir"/usr/bin
+      this_dir="$(dirname "$0")"
+
+      # make sure we can use our bundled dpkg/rpm(build)
+      export PATH="$this_dir"/usr/bin:"$PATH"
 
       "$this_dir"/usr/bin/python -m ldnp "$@"
       EOF
@@ -46,6 +46,7 @@ appimage:
       - --custom-apprun "$BUILD_DIR"/AppRun.sh
       - -e "$(which dpkg)"
       - -e "$(which rpm)"
+      - -e "$(which rpmbuild)"
     environment:
       PIP_REQUIREMENTS: .
       CONDA_PYTHON_VERSION: 3.11
