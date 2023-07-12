@@ -28,8 +28,6 @@ scripts:
 
       this_dir="$(dirname "$0")"
 
-      # make sure we can use our bundled dpkg/rpm(build)
-      export PATH="$this_dir"/usr/bin:"$PATH"
 
       "$this_dir"/usr/bin/python -m ldnp "$@"
       EOF
@@ -44,9 +42,6 @@ appimage:
       - -i "$BUILD_DIR"/ldnp.svg
       - -d "$BUILD_DIR"/ldnp.desktop
       - --custom-apprun "$BUILD_DIR"/AppRun.sh
-      - -e "$(which dpkg)"
-      - -e "$(which rpm)"
-      - -e "$(which rpmbuild)"
     environment:
       PIP_REQUIREMENTS: .
       CONDA_PYTHON_VERSION: 3.11
