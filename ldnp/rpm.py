@@ -79,8 +79,14 @@ class RpmPackager(Packager):
         assert self.version
         assert self.package_name
 
+        # try to automagically fix the version number if needed to make it work with rpm
+        fixed_version = self.version.replace("-", "_")
+
+        if fixed_version != self.version:
+            logger.warning(f"version number {self.version} incompatible, changed to: {fixed_version}")
+
         metadata = {
-            "version": self.version,
+            "version": fixed_version,
             "package_name": self.package_name,
         }
 
@@ -100,7 +106,10 @@ class RpmPackager(Packager):
         run_command(
             [
                 "rpmbuild",
-                "--build-in-place",
+                # make sure rpm can find files from the current directory
+                # this is the elaborate alternative to newer rpmbuild's --build-in-place
+                "--define",
+                f"_builddir {self.context.work_dir}",
                 # make sure we don't pollute the current user's $HOME
                 "--define",
                 f"_topdir {self.context.work_dir / 'rpmbuild'}",
