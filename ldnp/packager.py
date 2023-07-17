@@ -16,7 +16,7 @@ class Packager:
         self.appdir = appdir
         self.context: Context = context
 
-        self.appdir_install_path = self.context.install_root_dir / self.appdir.install_name
+        self.appdir_install_path = self.context.install_root_dir / self.appdir.relative_install_path
 
         # we require these values, so the CLI needs to either demand them from the user or set sane default values
         # TODO: validate these input values
@@ -93,7 +93,7 @@ class Packager:
 
         shutil.copytree(
             self.appdir.path,
-            self.context.install_root_dir,
+            self.appdir_install_path,
             symlinks=True,
             ignore_dangling_symlinks=True,
             dirs_exist_ok=True,
