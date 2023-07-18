@@ -9,6 +9,9 @@ from xdg.DesktopEntry import DesktopEntry
 
 from .appdir import AppDir
 from .context import Context
+from .logging import get_logger
+
+logger = get_logger().getChild("packager")
 
 
 class Packager:
@@ -16,13 +19,14 @@ class Packager:
         self.appdir = appdir
         self.context: Context = context
 
-        self.appdir_install_path = self.context.install_root_dir / self.appdir.relative_install_path
-
         # we require these values, so the CLI needs to either demand them from the user or set sane default values
         # TODO: validate these input values
         self.package_name = package_name
         self.version = version
         self.filename_prefix = filename_prefix
+
+        self.appdir_install_path = self.context.install_root_dir / "opt" / f"{self.package_name}.AppDir"
+        logger.debug(f"AppDir install path: {self.appdir_install_path}")
 
         # optional values that _can_ but do not have to be set
         # for these values, we internally provide default values in the templates
@@ -36,15 +40,7 @@ class Packager:
         self.description = short_description
 
     def find_desktop_files(self) -> Iterable[Path]:
-        rv = glob.glob(
-            str(
-                self.context.install_root_dir
-                / "opt"
-                / self.appdir.install_name
-                / AppDir.DESKTOP_FILES_RELATIVE_LOCATION
-                / "*.desktop"
-            )
-        )
+        rv = glob.glob(str(self.appdir_install_path / AppDir.DESKTOP_FILES_RELATIVE_LOCATION / "*.desktop"))
         return map(Path, rv)
 
     def copy_data_to_usr(self):

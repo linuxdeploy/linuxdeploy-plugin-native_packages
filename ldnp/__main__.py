@@ -73,7 +73,7 @@ def main(
 
     logger = get_logger("main")
 
-    appdir_instance = AppDir(appdir, "demo.AppDir")
+    appdir_instance = AppDir(appdir)
 
     if app_name and not package_name:
         logger.info(f"Using user-provided linuxdeploy output app name as package name: {app_name}")

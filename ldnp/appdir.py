@@ -15,14 +15,12 @@ class AppDir:
 
     DESKTOP_FILES_RELATIVE_LOCATION = "usr/share/applications"
 
-    def __init__(self, path: str | os.PathLike, install_name: str):
+    def __init__(self, path: str | os.PathLike):
         self.path = Path(path)
-        self.install_name = install_name
-        self.relative_install_path = Path("opt") / install_name
 
     def find_desktop_files(self) -> Iterable[Path]:
         rv = glob.glob(
-            str(self.path / "opt" / self.install_name / self.__class__.DESKTOP_FILES_RELATIVE_LOCATION / "*.desktop")
+            str(self.path / self.__class__.DESKTOP_FILES_RELATIVE_LOCATION / "*.desktop")
         )
         return map(Path, rv)
 
