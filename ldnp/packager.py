@@ -63,6 +63,7 @@ class Packager:
             distance_from_dst_to_root = dst.parent.relative_to(self.context.install_root_dir)
             relative_prefix = "/".join([".." for _ in distance_from_dst_to_root.parts])
             src = relative_prefix / src.relative_to(self.context.install_root_dir)
+            logger.debug(f"Creating relative symlink to {src} at {dst}")
             dst.unlink(missing_ok=True)
             os.symlink(src, dst)
 
