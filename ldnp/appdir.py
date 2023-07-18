@@ -19,9 +19,7 @@ class AppDir:
         self.path = Path(path)
 
     def find_desktop_files(self) -> Iterable[Path]:
-        rv = glob.glob(
-            str(self.path / self.__class__.DESKTOP_FILES_RELATIVE_LOCATION / "*.desktop")
-        )
+        rv = glob.glob(str(self.path / self.__class__.DESKTOP_FILES_RELATIVE_LOCATION / "*.desktop"))
         return map(Path, rv)
 
     def root_desktop_file(self) -> DesktopEntry:
