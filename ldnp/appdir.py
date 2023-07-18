@@ -14,6 +14,7 @@ class AppDir:
     """
 
     DESKTOP_FILES_RELATIVE_LOCATION = "usr/share/applications"
+    ICONS_RELATIVE_LOCATION = "usr/share/icons"
 
     def __init__(self, path: str | os.PathLike):
         self.path = Path(path)

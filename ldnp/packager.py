@@ -43,6 +43,19 @@ class Packager:
         rv = glob.glob(str(self.appdir_install_path / AppDir.DESKTOP_FILES_RELATIVE_LOCATION / "*.desktop"))
         return map(Path, rv)
 
+    def find_icons(self) -> Iterable[Path]:
+        for path in map(
+            Path,
+            glob.glob(
+                str(self.appdir_install_path / AppDir.ICONS_RELATIVE_LOCATION / "**" / "*.*"),
+                recursive=True,
+                include_hidden=True,
+            ),
+        ):
+            if not path.is_file():
+                continue
+            yield path
+
     def copy_data_to_usr(self):
         def create_relative_symlink(src: Path, dst: Path):
             # to calculate the amount of parent directories we need to move up, we can't use relative_to directly
@@ -82,6 +95,12 @@ class Packager:
                 raise ValueError("binary Exec= entry points to non-existing binary in AppDir/usr/bin/")
 
             create_relative_symlink(usr_bin_path, bin_dest_dir / exec_binary)
+
+        for icon in self.find_icons():
+            icon_relative_path = icon.relative_to(self.appdir_install_path)
+            dst = self.context.install_root_dir / icon_relative_path
+            os.makedirs(dst.parent, mode=0o755, exist_ok=True)
+            create_relative_symlink(icon, dst)
 
     def copy_appdir_contents(self):
         if os.path.exists(self.appdir_install_path):
