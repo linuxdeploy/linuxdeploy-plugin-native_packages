@@ -11,7 +11,7 @@ from .templating import jinja_env
 from .logging import get_logger
 from .util import run_command
 
-logger = get_logger().getChild("deb")
+logger = get_logger("rpm")
 
 
 def is_any_parent_dir_a_symlink(root_dir: Path, relative_file_path: Path):
