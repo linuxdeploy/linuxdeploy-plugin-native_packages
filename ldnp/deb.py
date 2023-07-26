@@ -10,7 +10,7 @@ from .util import run_command
 from .logging import get_logger
 
 
-logger = get_logger().getChild("deb")
+logger = get_logger("deb")
 
 
 class DebPackager(Packager):

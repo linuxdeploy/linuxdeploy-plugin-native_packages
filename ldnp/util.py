@@ -6,7 +6,7 @@ from typing import List
 from .logging import get_logger
 
 
-logger = get_logger().getChild("util")
+logger = get_logger("util")
 
 
 def run_command(command: List[str | os.PathLike], **kwargs):

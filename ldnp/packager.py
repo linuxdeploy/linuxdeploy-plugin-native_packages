@@ -11,7 +11,7 @@ from .appdir import AppDir
 from .context import Context
 from .logging import get_logger
 
-logger = get_logger().getChild("packager")
+logger = get_logger("packager")
 
 
 class Packager:
