@@ -2,6 +2,7 @@ import glob
 import os
 import shlex
 import shutil
+import stat
 from pathlib import Path
 from typing import Iterable
 
@@ -25,7 +26,8 @@ class Packager:
         self.version = version
         self.filename_prefix = filename_prefix
 
-        self.appdir_install_path = self.context.install_root_dir / "opt" / f"{self.package_name}.AppDir"
+        self.appdir_installed_path = Path(f"/opt/{self.package_name}.AppDir")
+        self.appdir_install_path = self.context.install_root_dir / str(self.appdir_installed_path).lstrip("/")
         logger.debug(f"AppDir install path: {self.appdir_install_path}")
 
         # optional values that _can_ but do not have to be set
@@ -67,6 +69,33 @@ class Packager:
             dst.unlink(missing_ok=True)
             os.symlink(src, dst)
 
+        def create_binary_script(script_path: str | os.PathLike, target_binary: str | os.PathLike):
+            logger.debug(f"Creating script for target binary {target_binary} in {script_path}")
+
+            with open(script_path, "w") as f:
+                f.write(
+                    "\n".join(
+                        [
+                            "#! /bin/sh",
+                            "",
+                            "set -e",
+                            "",
+                            f'script_dir="{shlex.quote(str(self.appdir_installed_path))}/apprun-hooks"',
+                            f'if [ -d "$script_dir" ]; then',
+                            '    for script in "$script_dir"/*; do',
+                            '        . "$script"',
+                            "    done",
+                            "fi",
+                            "",
+                            f'exec {shlex.quote(str(target_binary))} "$@"',
+                            "",
+                        ]
+                    )
+                )
+
+            st = os.stat(script_path)
+            os.chmod(script_path, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
         # by default, we install all the desktop files found in AppDir/usr/share/ to the system-wide /usr/share we
         # then look for these apps' Exec= keys and install symlinks to the real binaries within the AppDir to /usr/bin
         desktop_files_dest_dir = self.context.install_root_dir / AppDir.DESKTOP_FILES_RELATIVE_LOCATION
@@ -95,7 +124,10 @@ class Packager:
             if not usr_bin_path.exists():
                 raise ValueError("binary Exec= entry points to non-existing binary in AppDir/usr/bin/")
 
-            create_relative_symlink(usr_bin_path, bin_dest_dir / exec_binary)
+            create_binary_script(
+                self.context.install_root_dir / "usr/bin" / exec_binary,
+                self.appdir_installed_path / "usr/bin" / exec_binary,
+            )
 
         for icon in self.find_icons():
             icon_relative_path = icon.relative_to(self.appdir_install_path)
