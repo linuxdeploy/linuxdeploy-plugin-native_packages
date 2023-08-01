@@ -95,4 +95,9 @@ class DebPackager(Packager):
         # signatures of binary .deb archives
         # we use this tool to sign the packages built by this tool if requested to do so by the user
         # it is at least better than not attaching any signatures or using detached ones
-        run_command(["dpkg-sig", "--sign=builder", str(path), "-k", gpg_key])
+        command = ["dpkg-sig", "--sign=builder", str(path)]
+
+        if gpg_key is not None:
+            command += ["-k", gpg_key]
+
+        run_command(command)
