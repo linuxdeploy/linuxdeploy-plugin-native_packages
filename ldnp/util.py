@@ -22,4 +22,8 @@ def run_command(command: List[str | os.PathLike], **kwargs):
 
     logger.info(f"running command {shlex.join(map(str, command))}")
 
+    # this is for people who know how Python renders lists
+    # it allows the user to introspect the types of the parameters passed to this function
+    logger.debug(f"command args: {repr(list(command))}")
+
     return subprocess.check_call(command, **kwargs)
