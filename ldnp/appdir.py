@@ -2,7 +2,6 @@ import glob
 import os
 import shlex
 from pathlib import Path
-from typing import Iterable
 
 from xdg.DesktopEntry import DesktopEntry
 
@@ -15,13 +14,11 @@ class AppDir:
 
     DESKTOP_FILES_RELATIVE_LOCATION = "usr/share/applications"
     ICONS_RELATIVE_LOCATION = "usr/share/icons"
+    MIME_FILES_RELATIVE_LOCATION = "usr/share/mime"
+    CLOUDPROVIDERS_FILES_RELATIVE_LOCATION = "usr/share/cloud-providers"
 
     def __init__(self, path: str | os.PathLike):
         self.path = Path(path)
-
-    def find_desktop_files(self) -> Iterable[Path]:
-        rv = glob.glob(str(self.path / self.__class__.DESKTOP_FILES_RELATIVE_LOCATION / "*.desktop"))
-        return map(Path, rv)
 
     def root_desktop_file(self) -> DesktopEntry:
         desktop_files = glob.glob(str(self.path / "*.desktop"))

@@ -45,18 +45,23 @@ class Packager:
         rv = glob.glob(str(self.appdir_install_path / AppDir.DESKTOP_FILES_RELATIVE_LOCATION / "*.desktop"))
         return map(Path, rv)
 
-    def find_icons(self) -> Iterable[Path]:
-        for path in map(
-            Path,
-            glob.glob(
-                str(self.appdir_install_path / AppDir.ICONS_RELATIVE_LOCATION / "**" / "*.*"),
-                recursive=True,
-                include_hidden=True,
-            ),
-        ):
+    @staticmethod
+    def _find_file_paths_in_directory(directory: Path) -> Iterable[Path]:
+        for path in map(Path, glob.glob(str(directory / "**" / "*.*"), recursive=True, include_hidden=True)):
             if not path.is_file():
                 continue
             yield path
+
+    def find_icons(self) -> Iterable[Path]:
+        return self._find_file_paths_in_directory(self.appdir_install_path / AppDir.ICONS_RELATIVE_LOCATION)
+
+    def find_mime_files(self) -> Iterable[Path]:
+        return self._find_file_paths_in_directory(self.appdir_install_path / AppDir.MIME_FILES_RELATIVE_LOCATION)
+
+    def find_cloudproviders_files(self) -> Iterable[Path]:
+        return self._find_file_paths_in_directory(
+            self.appdir_install_path / AppDir.CLOUDPROVIDERS_FILES_RELATIVE_LOCATION
+        )
 
     def copy_data_to_usr(self):
         def create_relative_symlink(src: Path, dst: Path):
@@ -129,11 +134,24 @@ class Packager:
                 self.appdir_installed_path / "usr/bin" / exec_binary,
             )
 
-        for icon in self.find_icons():
-            icon_relative_path = icon.relative_to(self.appdir_install_path)
-            dst = self.context.install_root_dir / icon_relative_path
+        def deploy_file_as_is(path):
+            logger.debug(f"deploying file {path} as-is")
+            relative_path = path.relative_to(self.appdir_install_path)
+            dst = self.context.install_root_dir / relative_path
             os.makedirs(dst.parent, mode=0o755, exist_ok=True)
-            create_relative_symlink(icon, dst)
+            create_relative_symlink(path, dst)
+
+        # icon files can just be symlinked, there is no reason _ever_ to modify them
+        for icon in self.find_icons():
+            deploy_file_as_is(icon)
+
+        # MIME files just describe a type and shouldn't contain any paths, therefore we can just link them
+        for mime_file in self.find_mime_files():
+            deploy_file_as_is(mime_file)
+
+        # same goes for libcloudproviders configuration data, which just describe some D-Bus endpoints
+        for cloudproviders_file in self.find_cloudproviders_files():
+            deploy_file_as_is(cloudproviders_file)
 
     def copy_appdir_contents(self):
         if os.path.exists(self.appdir_install_path):
