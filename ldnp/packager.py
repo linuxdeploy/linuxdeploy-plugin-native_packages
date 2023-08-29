@@ -52,8 +52,13 @@ class Packager:
                 continue
             yield path
 
-    def find_icons(self) -> Iterable[Path]:
-        return self._find_file_paths_in_directory(self.appdir_install_path / AppDir.ICONS_RELATIVE_LOCATION)
+    def find_icons(self, prefix: str = None) -> Iterable[Path]:
+        all_icons = self._find_file_paths_in_directory(self.appdir_install_path / AppDir.ICONS_RELATIVE_LOCATION)
+
+        if prefix is None:
+            return all_icons
+
+        return filter(lambda p: p.parts[-1].startswith(prefix), all_icons)
 
     def find_mime_files(self) -> Iterable[Path]:
         return self._find_file_paths_in_directory(self.appdir_install_path / AppDir.MIME_FILES_RELATIVE_LOCATION)
@@ -109,6 +114,13 @@ class Packager:
         bin_dest_dir = self.context.install_root_dir / "usr/bin"
         os.makedirs(bin_dest_dir, exist_ok=True)
 
+        def deploy_file_as_is(path):
+            logger.debug(f"Deploying file {path} as-is")
+            relative_path = path.relative_to(self.appdir_install_path)
+            dst = self.context.install_root_dir / relative_path
+            os.makedirs(dst.parent, mode=0o755, exist_ok=True)
+            create_relative_symlink(path, dst)
+
         for desktop_file in self.find_desktop_files():
             dst = desktop_files_dest_dir / desktop_file.name
             create_relative_symlink(desktop_file, dst)
@@ -117,6 +129,11 @@ class Packager:
             # TODO: make optional
             desktop_entry = DesktopEntry(dst)
             exec_entry = desktop_entry.getExec()
+
+            # icon files can just be symlinked, there is no reason _ever_ to modify them
+            # note: this assumes that the icon entry is configured correctly with a filename only!
+            for icon in self.find_icons(desktop_entry.getIcon()):
+                deploy_file_as_is(icon)
 
             if not exec_entry:
                 raise ValueError("Exec= entry not set")
@@ -134,18 +151,8 @@ class Packager:
                 self.appdir_installed_path / "usr/bin" / exec_binary,
             )
 
-        def deploy_file_as_is(path):
-            logger.debug(f"deploying file {path} as-is")
-            relative_path = path.relative_to(self.appdir_install_path)
-            dst = self.context.install_root_dir / relative_path
-            os.makedirs(dst.parent, mode=0o755, exist_ok=True)
-            create_relative_symlink(path, dst)
-
-        # icon files can just be symlinked, there is no reason _ever_ to modify them
-        for icon in self.find_icons():
-            deploy_file_as_is(icon)
-
         # MIME files just describe a type and shouldn't contain any paths, therefore we can just link them
+        # TODO: deploy icons for MIME files
         for mime_file in self.find_mime_files():
             deploy_file_as_is(mime_file)
 
