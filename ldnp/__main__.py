@@ -119,8 +119,6 @@ def main(
             description = meta_info.get("description")
             short_description = meta_info.get("short_description")
 
-            print(meta_info["depends"])
-
             if short_description and not description:
                 logger.warning("No description provided, falling back to short description")
                 description = short_description
