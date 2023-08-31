@@ -5,8 +5,7 @@ from pathlib import Path
 
 import gnupg
 
-from .context import Context
-from .packager import Packager
+from .abstractpackager import AbstractPackager, AbstractMetaInfo
 from .templating import jinja_env
 from .logging import get_logger
 from .util import run_command
@@ -37,10 +36,20 @@ def is_any_parent_dir_a_symlink(root_dir: Path, relative_file_path: Path):
     return False
 
 
-class RpmPackager(Packager):
+class RpmMetaInfo(AbstractMetaInfo):
+    @staticmethod
+    def packager_prefix():
+        return "RPM"
+
+
+class RpmPackager(AbstractPackager):
     """
     This class is inspired by CPack's DEB generator code.
     """
+
+    @staticmethod
+    def make_meta_info():
+        return RpmMetaInfo()
 
     def generate_spec_file(self):
         files_and_directories = list(
@@ -76,28 +85,22 @@ class RpmPackager(Packager):
 
             files.append(path_to_include)
 
-        assert self.version
-        assert self.package_name
+        assert self.meta_info["package_name"]
+
+        version = self.meta_info["version"]
+        assert version
 
         # try to automagically fix the version number if needed to make it work with rpm
-        fixed_version = self.version.replace("-", "_")
+        fixed_version = version.replace("-", "_")
 
-        if fixed_version != self.version:
-            logger.warning(f"version number {self.version} incompatible, changed to: {fixed_version}")
-
-        metadata = {
-            "version": fixed_version,
-            "package_name": self.package_name,
-        }
-
-        if self.description:
-            metadata["description"] = self.description
-
-        if self.short_description:
-            metadata["short_description"] = self.short_description
+        if fixed_version != version:
+            logger.warning(f"version number {version} incompatible, changed to: {fixed_version}")
 
         # sorting is technically not needed but makes reading and debugging easier
-        rendered = jinja_env.get_template("rpm/spec").render(files=list(sorted(files)), **metadata)
+        # note: fixed_version is packager-specific, so we pass it separately
+        rendered = jinja_env.get_template("rpm/spec").render(
+            files=list(sorted(files)), meta_info=self.meta_info, fixed_version=fixed_version
+        )
 
         with open(self.context.work_dir / "package.spec", "w") as f:
             f.write(rendered)

@@ -1,59 +1,59 @@
 {# see https://www.debian.org/doc/debian-policy/ch-controlfields.html for more information #}
 
 {# mandatory values #}
-Package: {{ package_name | default("ldnp-unknown") }}
-Version: {{ version | default("0.0.1-1unknown1") }}
-Architecture: {{ architecture | default("amd64") }}
-Maintainer: {{ maintainer_name | default("ldnp user") }} <{{ maintainer_email | default("user@ldnp") }}>
-Description: {{ description | default(short_description) | default("ldnp-built package") }}
+Package: {{ meta_info.get("package_name") | default("ldnp-unknown", true) }}
+Version: {{ meta_info.get("version") | default("0.0.1-1unknown1", true) }}
+Architecture: {{ meta_info.get("architecture") | default("amd64", true) }}
+Maintainer: {{ meta_info.get("maintainer_name") | default("ldnp user") }} <{{ maintainer_email | default("user@ldnp", true) }}>
+Description: {{ meta_info.get("description") | default(meta_info.get("short_description")) | default("ldnp-built package", true) }}
 
 {# recommended values #}
-Section: {{ section | default("misc") }}
-Priority: {{ priority | default("standard") }}
+Section: {{ meta_info.get("section") | default("misc", true) }}
+Priority: {{ meta_info.get("priority") | default("standard", true) }}
 
 {# optional values #}
 
 {# we can always calculate the installed size estimation #}
 Installed-Size: {{ installed_size }}
 
-{%- if source %}
-Source: {{ source }}
+{%- if meta_info.get("source") %}
+Source: {{ meta_info["source"] }}
 {%- endif %}
-{%- if essential %}
-Essential: {{ essential }}
+{%- if meta_info.get("essential") %}
+Essential: {{ meta_info["essential"] }}
 {%- endif %}
-{%- if depends %}
-Depends: {{ depends }}
+{%- if meta_info.get("depends") %}
+Depends: {{ meta_info["depends"] }}
 {%- endif %}
-{%- if pre_depends %}
-Pre-Depends: {{ pre_depends }}
+{%- if meta_info.get("pre_depends") %}
+Pre-Depends: {{ meta_info["depends"] }}
 {%- endif %}
-{%- if recommends %}
-Recommends: {{ recommends }}
+{%- if meta_info.get("recommends") %}
+Recommends: {{ meta_info["recommends"] }}
 {%- endif %}
-{%- if suggests %}
-Suggests: {{ suggests }}
+{%- if meta_info.get("suggests") %}
+Suggests: {{ meta_info["suggests"] }}
 {%- endif %}
-{%- if breaks %}
-Breaks: {{ breaks }}
+{%- if meta_info.get("breaks") %}
+Breaks: {{ meta_info["breaks"] }}
 {%- endif %}
-{%- if conflicts %}
-Conflicts: {{ conflicts }}
+{%- if meta_info.get("conflicts") %}
+Conflicts: {{ meta_info["conflicts"] }}
 {%- endif %}
-{%- if provides %}
-Provides: {{ provides }}
+{%- if meta_info.get("provides") %}
+Provides: {{ meta_info["provides"] }}
 {%- endif %}
-{%- if source %}
-Source: {{ source }}
+{%- if meta_info.get("source") %}
+Source: {{ meta_info["source"] }}
 {%- endif %}
-{%- if replaces %}
-Replaces: {{ replaces }}
+{%- if meta_info.get("replaces") %}
+Replaces: {{ meta_info["replaces"] }}
 {%- endif %}
-{%- if enhances %}
-Enhances: {{ enhances }}
+{%- if meta_info.get("enhances") %}
+Enhances: {{ meta_info["enhances"] }}
 {%- endif %}
-{%- if homepage %}
-Homepage: {{ homepage }}
+{%- if meta_info.get("homepage") %}
+Homepage: {{ meta_info["homepage"] }}
 {%- endif %}
 
 {# just some advertising... #}

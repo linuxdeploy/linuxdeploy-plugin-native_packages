@@ -3,6 +3,7 @@ import os
 import shlex
 import shutil
 import stat
+from collections import UserDict
 from pathlib import Path
 from typing import Iterable
 
@@ -15,31 +16,97 @@ from .logging import get_logger
 logger = get_logger("packager")
 
 
-class Packager:
-    def __init__(self, appdir: AppDir, package_name: str, version: str, filename_prefix: str, context: Context):
+class AbstractMetaInfo(UserDict):
+    """
+    Base class for meta information from which the packaging files are generated.
+
+    The metadata needed for either supported packager can differ to some extent, but there are also shared values
+    which are implemented here.
+
+    The meta information is typically passed to the application via environment variables which follow a specific
+    pattern:
+
+    "LDNP_" as a prefix, "META_" to identify it as meta information and an arbitrary identifier suffix.
+
+    Optionally, before the identifier suffix, a packager designation may be passed to use the information only for a
+    specific packager. Currently, DEB_ and RPM_ are supported.
+
+    The identifier may contain any character that is valid for an environment variable. It is recommended to only use
+    uppercase alphanumeric characters [A-Z0-9] and underscores _.
+
+    For instance, a package description could be passed to the meta information system as "LDNP_META_DESCRIPTION".
+    An RPM-only description would be passed as "LDNP_META_RPM_DESCRIPTION".
+
+    If the packager cannot make any use of the information provided in the environment, the value will be ignored.
+
+    Packager-specific implementations need to implement the packager_prefix method, returning a unique designator.
+    """
+
+    # as some meta information may be set programmatically, too, we need a "cache" for those values
+    # information provided via environment variables currently always take precedence over those programmatically
+    # provided values
+    # all identifiers are case supposed to be case-insensitive and will be normalized to upper case (which matches
+    # the environment variables)
+
+    @staticmethod
+    def packager_prefix():
+        raise NotImplementedError
+
+    def __setitem__(self, key, value):
+        # we treat all keys as case-insensitive and normalize them to uppercase
+        self.data[key.upper()] = value
+
+    def __getitem__(self, identifier: str):
+        """
+        Implements the "subscript" operator. Checks the environment for packager-specific and globally set meta info.
+
+        :param identifier: identifier suffix (see class description)
+        :return: value for provided identifier (if available)
+        :raises KeyError: if the requested value is unavailable
+        """
+
+        # identifiers are supposed to be case insensitive within our code (we accept only upper-case env vars)
+        identifier = identifier.upper()
+
+        prefix = "LDNP_META"
+
+        global_env_var = f"{prefix}_{identifier}"
+        specific_env_var = f"{prefix}_{self.packager_prefix()}_{identifier.upper()}"
+
+        # just needed to be able to rewrite the error message
+        try:
+            try:
+                return os.environ[specific_env_var]
+
+            except KeyError:
+                try:
+                    return os.environ[global_env_var]
+
+                except KeyError:
+                    # the KeyError here should propagate to the caller if raised
+                    return self.data[identifier]
+
+        except KeyError:
+            raise KeyError(f"Could not find {identifier.upper()}")
+
+
+class AbstractPackager:
+    def __init__(self, appdir: AppDir, meta_info: AbstractMetaInfo, context: Context):
         self.appdir = appdir
+        self.meta_info = meta_info
         self.context: Context = context
 
-        # we require these values, so the CLI needs to either demand them from the user or set sane default values
-        # TODO: validate these input values
-        self.package_name = package_name
-        self.version = version
-        self.filename_prefix = filename_prefix
+        assert self.meta_info["package_name"]
+        assert self.meta_info["version"]
+        assert self.meta_info["filename_prefix"]
 
-        self.appdir_installed_path = Path(f"/opt/{self.package_name}.AppDir")
+        self.appdir_installed_path = Path(f"/opt/{self.meta_info['package_name']}.AppDir")
         self.appdir_install_path = self.context.install_root_dir / str(self.appdir_installed_path).lstrip("/")
         logger.debug(f"AppDir install path: {self.appdir_install_path}")
 
-        # optional values that _can_ but do not have to be set
-        # for these values, we internally provide default values in the templates
-        self.description = None
-        self.short_description = None
-
-    def set_description(self, description: str):
-        self.description = description
-
-    def set_short_description(self, short_description: str):
-        self.description = short_description
+    @staticmethod
+    def make_meta_info():
+        raise NotImplementedError
 
     def find_desktop_files(self) -> Iterable[Path]:
         rv = glob.glob(str(self.appdir_install_path / AppDir.DESKTOP_FILES_RELATIVE_LOCATION / "*.desktop"))

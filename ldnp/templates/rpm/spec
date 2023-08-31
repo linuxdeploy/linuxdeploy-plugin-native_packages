@@ -1,7 +1,7 @@
-Name:       {{ package_name | default("ldnp-unknown") }}
-Version:    {{ version | default("0.0.1") }}
+Name:       {{ meta_info.get("package_name") | default("ldnp-unknown", true) }}
+Version:    {{ fixed_version | default("0.0.1", true) }}
 Release:    1%{?dist}
-Summary:    {{ short_description | default("ldnp-built package") }}
+Summary:    {{ meta_info.get("short_description") | default("ldnp-built package", true) }}
 
 Group:      System Environment/Base
 License:    GPLv3+
@@ -17,8 +17,16 @@ License:    GPLv3+
 # this guessing is broken due to the fact that the AppDir contains almost all of the dependencies itself
 AutoReqProv: no
 
+{% for req in meta_info.get("requires", "").split() %}
+Requires: {{ req }}
+{% endfor %}
+
+{% for prov in meta_info.get("provides", "").split() %}
+Provides: {{ prov }}
+{% endfor %}
+
 %description
-{{ description | default(short_description) | default("ldnp-built package") }}
+{{ meta_info.get("description") | default(meta_info.get("short_description"), true) | default("ldnp-built package", true) }}
 
 %prep
 # nothing to do

@@ -7,23 +7,35 @@ from typing import Iterable
 
 import click
 
+from .abstractpackager import AbstractMetaInfo, AbstractPackager
 from .logging import set_up_logging, get_logger
 from .context import Context
 from .appdir import AppDir
-from .deb import DebPackager
-from .rpm import RpmPackager
+from .deb import DebPackager, DebMetaInfo
+from .rpm import RpmPackager, RpmMetaInfo
 
 
-def make_packager(
-    build_type: str, appdir: AppDir, package_name: str, version: str, filename_prefix: str, context_path: Path
-):
+def make_meta_info(build_type: str) -> AbstractMetaInfo:
+    if build_type == "rpm":
+        meta_info = RpmMetaInfo()
+
+    elif build_type == "deb":
+        meta_info = DebMetaInfo()
+
+    else:
+        raise KeyError(f"cannot create packager for unknown build type {build_type}")
+
+    return meta_info
+
+
+def make_packager(build_type: str, appdir: AppDir, meta_info: AbstractMetaInfo, context_path: Path) -> AbstractPackager:
     context = Context(context_path)
 
     if build_type == "rpm":
-        packager = RpmPackager(appdir, package_name, version, filename_prefix, context)
+        packager = RpmPackager(appdir, meta_info, context)
 
     elif build_type == "deb":
-        packager = DebPackager(appdir, package_name, version, filename_prefix, context)
+        packager = DebPackager(appdir, meta_info, context)
 
     else:
         raise KeyError(f"cannot create packager for unknown build type {build_type}")
@@ -50,12 +62,10 @@ ENV_VAR_PREFIX = "LDNP"
 @click.option("--sign", is_flag=True, default=False, show_envvar=True)
 @click.option("--gpg-key", default=None, show_envvar=True)
 @click.option("--debug", is_flag=True, default=False, envvar="DEBUG", show_envvar=True)
+# compatibility with linuxdeploy output plugin spec flags, plugin-specific environment variables will always take
+# precedence
 @click.option("--app-name", default=None, envvar="LINUXDEPLOY_OUTPUT_APP_NAME", show_envvar=True)
 @click.option("--package-version", default=None, envvar="LINUXDEPLOY_OUTPUT_VERSION", show_envvar=True)
-@click.option("--package-name", default=None, envvar="LDNP_PACKAGE_NAME", show_envvar=True)
-@click.option("--description", default=None, envvar="LDNP_DESCRIPTION", show_envvar=True)
-@click.option("--short-description", default=None, envvar="LDNP_SHORT_DESCRIPTION", show_envvar=True)
-@click.option("--filename-prefix", default=None, envvar="LDNP_FILENAME_PREFIX", show_envvar=True)
 def main(
     build: Iterable[str],
     appdir: str | os.PathLike,
@@ -64,34 +74,12 @@ def main(
     debug: bool,
     app_name: str,
     package_version: str,
-    package_name: str,
-    description: str,
-    short_description: str,
-    filename_prefix: str,
 ):
     set_up_logging(debug)
 
     logger = get_logger("main")
 
     appdir_instance = AppDir(appdir)
-
-    if app_name and not package_name:
-        logger.info(f"Using user-provided linuxdeploy output app name as package name: {app_name}")
-        package_name = app_name
-    elif package_name:
-        logger.info(f"Using user-provided package name: {package_name}")
-    else:
-        package_name = appdir_instance.guess_package_name()
-
-        if not package_name:
-            logger.critical("No package name provided and guessing failed")
-            sys.exit(2)
-
-        logger.info(f"Guessed package name {package_name}")
-
-    if not filename_prefix:
-        logger.info("Using package name as filename prefix")
-        filename_prefix = package_name
 
     if not package_version:
         try:
@@ -103,10 +91,35 @@ def main(
     logger.info(f"Package version: {package_version}")
 
     for build_type in build:
+        meta_info = make_meta_info(build_type)
+        meta_info["version"] = package_version
+
+        if app_name and not meta_info.get("package_name"):
+            logger.info(f"Using user-provided linuxdeploy output app name as package name: {app_name}")
+            meta_info["package_name"] = app_name
+        elif meta_info.get("package_name"):
+            logger.info(f"Using user-provided package name: {meta_info['package_name']}")
+        else:
+            guessed_package_name = appdir_instance.guess_package_name()
+
+            if not guessed_package_name:
+                logger.critical("No package name provided and guessing failed")
+                sys.exit(2)
+
+            meta_info["package_name"] = guessed_package_name
+            logger.info(f"Guessed package name {meta_info['package_name']}")
+
+        if not meta_info.get("filename_prefix"):
+            logger.info("Using package name as filename prefix")
+            meta_info["filename_prefix"] = meta_info["package_name"]
+
         with TemporaryDirectory(prefix="ldnp-") as td:
-            packager = make_packager(
-                build_type, appdir_instance, package_name, package_version, filename_prefix, Path(td)
-            )
+            packager = make_packager(build_type, appdir_instance, meta_info, Path(td))
+
+            description = meta_info.get("description")
+            short_description = meta_info.get("short_description")
+
+            print(meta_info["depends"])
 
             if short_description and not description:
                 logger.warning("No description provided, falling back to short description")
@@ -118,14 +131,14 @@ def main(
                 logger.warning("Neither description nor short description provided")
 
             if description:
-                packager.set_description(description)
+                meta_info["description"] = description
 
             if short_description:
-                packager.set_short_description(short_description)
+                meta_info["short_description"] = short_description
 
             # the correct filename suffix will be appended automatically if not specified
             # for now, we just build the package in the current working directory
-            out_path = Path(os.getcwd()) / package_name
+            out_path = Path(os.getcwd()) / meta_info["package_name"]
 
             if package_version:
                 out_path = Path(f"{out_path}_{package_version}")

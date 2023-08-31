@@ -18,3 +18,12 @@ Additionally, the following environment variables are supported:
 - `LDNP_SHORT_DESCRIPTION`: Optional short package description for the package's metadata.
 - `LDNP_PACKAGE_NAME`: The package name to be configured in the metadata. If this is not set, the app name is used.
 - `LDNP_FILENAME_PREFIX`: By default, the package name is used. If this is insufficient, a custom value can be specified.
+
+Additional package meta information may be passed in using `LDNP_META_*` variables. Some examples:
+
+- `LDNP_META_DESCRIPTION`:
+- `LDNP_META_SHORT_DESCRIPTION`
+- `LDNP_META_RPM_DESCRIPTION`
+- `LDNP_META_DEB_DESCRIPTION`
+- `LDNP_META_DEB_DEPENDS`
+- `LDNP_META_RPM_REQUIRES`
