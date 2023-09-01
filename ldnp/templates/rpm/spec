@@ -1,10 +1,35 @@
 Name:       {{ meta_info.get("package_name") | default("ldnp-unknown", true) }}
 Version:    {{ fixed_version | default("0.0.1", true) }}
-Release:    1%{?dist}
+Release:    {{ meta_info.get("release") | default("1", true) }}%{?dist}
 Summary:    {{ meta_info.get("short_description") | default("ldnp-built package", true) }}
 
-Group:      System Environment/Base
-License:    GPLv3+
+Group:      {{ meta_info.get("group") | default("System Environment/Base", true) }}
+
+BuildArch:  {{ meta_info["build_arch"] | default("noarch", true) }}
+
+{% if meta_info.get("license") %}
+License: {{ meta_info["license"] }}
+{% endif %}
+{% if meta_info.get("url") %}
+URL: {{ meta_info["url"] }}
+{% endif %}
+{% if meta_info.get("bug_url") %}
+BugURL:    {{ meta_info["bug_url"] }}
+{% endif %}
+{% if meta_info.get("vendor") %}
+Vendor: {{ meta_info["vendor"] }}
+{% endif %}
+
+{% if meta_info.get("vendor") %}
+Vendor: {{ meta_info["vendor"] }}
+{% endif %}
+
+{# just some advertising... #}
+Packager: {{ meta_info["packager"] | default("linuxdeploy-plugin-native_packages", true) }}
+
+{% if meta_info.get("vendor") %}
+Vendor: {{ meta_info["vendor"] }}
+{% endif %}
 
 # note: we must _not_ strip these files again, this breaks them beyond repair
 # (in theory, they have been stripped by linuxdeploy already anyway)
@@ -20,9 +45,26 @@ AutoReqProv: no
 {% for req in meta_info.get("requires", "").split() %}
 Requires: {{ req }}
 {% endfor %}
-
 {% for prov in meta_info.get("provides", "").split() %}
 Provides: {{ prov }}
+{% endfor %}
+{% for conflict in meta_info.get("conflicts", "").split() %}
+Conflicts: {{ conflict }}
+{% endfor %}
+{% for obs in meta_info.get("obsoletes", "").split() %}
+Obsoletes: {{ obs }}
+{% endfor %}
+{% for rec in meta_info.get("recommends", "").split() %}
+Recommends: {{ rec }}
+{% endfor %}
+{% for suggestion in meta_info.get("suggests", "").split() %}
+Suggests: {{ suggestion }}
+{% endfor %}
+{% for suppl in meta_info.get("supplements", "").split() %}
+Supplements: {{ suppl }}
+{% endfor %}
+{% for conflict in meta_info.get("conflicts", "").split() %}
+Enhances: {{ conflict }}
 {% endfor %}
 
 %description
