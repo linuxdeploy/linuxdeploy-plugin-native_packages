@@ -65,7 +65,7 @@ class AbstractMetaInfo(UserDict):
         :raises KeyError: if the requested value is unavailable
         """
 
-        # identifiers are supposed to be case insensitive within our code (we accept only upper-case env vars)
+        # identifiers are supposed to be case-insensitive within our code (we accept only upper-case env vars)
         identifier = identifier.upper()
 
         prefix = "LDNP_META"
