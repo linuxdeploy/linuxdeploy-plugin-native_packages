@@ -57,4 +57,4 @@ Homepage: {{ meta_info["homepage"] }}
 {%- endif %}
 
 {# just some advertising... #}
-Built-Using: linuxdeploy-plugin-native-packaging
+Built-Using: linuxdeploy-plugin-native_packages
