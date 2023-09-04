@@ -199,7 +199,9 @@ class AbstractPackager:
 
             # icon files can just be symlinked, there is no reason _ever_ to modify them
             # note: this assumes that the icon entry is configured correctly with a filename only!
-            for icon in self.find_icons(desktop_entry.getIcon()):
+            icons_prefix = f"{desktop_entry.getIcon()}."
+            logger.debug(f"icons prefix: {icons_prefix}")
+            for icon in self.find_icons(icons_prefix):
                 deploy_file_as_is(icon)
 
             if not exec_entry:
