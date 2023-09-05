@@ -20,16 +20,8 @@ BugURL:    {{ meta_info["bug_url"] }}
 Vendor: {{ meta_info["vendor"] }}
 {% endif %}
 
-{% if meta_info.get("vendor") %}
-Vendor: {{ meta_info["vendor"] }}
-{% endif %}
-
 {# just some advertising... #}
 Packager: {{ meta_info["packager"] | default("linuxdeploy-plugin-native_packages", true) }}
-
-{% if meta_info.get("vendor") %}
-Vendor: {{ meta_info["vendor"] }}
-{% endif %}
 
 # note: we must _not_ strip these files again, this breaks them beyond repair
 # (in theory, they have been stripped by linuxdeploy already anyway)
