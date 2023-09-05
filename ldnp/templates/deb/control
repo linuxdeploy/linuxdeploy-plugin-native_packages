@@ -4,7 +4,7 @@
 Package: {{ meta_info.get("package_name") | default("ldnp-unknown", true) }}
 Version: {{ meta_info.get("version") | default("0.0.1-1unknown1", true) }}
 Architecture: {{ meta_info.get("architecture") | default("all", true) }}
-Maintainer: {{ meta_info.get("maintainer_name") | default("ldnp user") }} <{{ maintainer_email | default("user@ldnp", true) }}>
+Maintainer: {{ meta_info.get("maintainer") | default("ldnp <ldnp@ldnp>", true) }}
 Description: {{ meta_info.get("description") | default(meta_info.get("short_description")) | default("ldnp-built package", true) }}
 
 {# recommended values #}
