@@ -56,7 +56,7 @@ Enhances: {{ meta_info["enhances"] }}
 Homepage: {{ meta_info["homepage"] }}
 {%- endif +%}
 
-# at this point, we do not need to support Debian's multiarch feature and disable it (resp. restore legacy behavior)
+{# at this point, we do not need to support Debian's multiarch feature and disable it (resp. restore legacy behavior) #}
 Multi-Arch: no
 
 {# just some advertising... #}
