@@ -4,12 +4,12 @@ Release:    {{ meta_info.get("release") | default("1", true) }}%{?dist}
 Summary:    {{ meta_info.get("short_description") | default("ldnp-built package", true) }}
 
 Group:      {{ meta_info.get("group") | default("System Environment/Base", true) }}
+License: {{ meta_info.get("license") | default("unknown") }}
 
-BuildArch:  {{ meta_info["build_arch"] | default("noarch", true) }}
-
-{% if meta_info.get("license") %}
-License: {{ meta_info["license"] }}
+{% if meta_info.get("build_arch") %}
+BuildArch:  {{ meta_info["build_arch"] }}
 {% endif %}
+
 {% if meta_info.get("url") %}
 URL: {{ meta_info["url"] }}
 {% endif %}
