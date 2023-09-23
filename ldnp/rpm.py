@@ -122,7 +122,7 @@ class RpmPackager(AbstractPackager):
                 # better use a custom variable to make things explicit
                 "--define",
                 f"_install_root {self.context.install_root_dir}",
-                # make the package coinstallable                
+                # make the package coinstallable
                 "--define",
                 "_build_id_links none",
                 "-bb",
