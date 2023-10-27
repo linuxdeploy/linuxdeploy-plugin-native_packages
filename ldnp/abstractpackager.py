@@ -1,3 +1,4 @@
+import configparser
 import glob
 import os
 import shlex
@@ -240,6 +241,24 @@ class AbstractPackager:
             ignore_dangling_symlinks=True,
             dirs_exist_ok=True,
         )
+
+    def write_ldnp_conf(self):
+        conf_path = self.appdir_install_path / "usr" / "bin" / "linuxdeploy.conf"
+
+        config = configparser.ConfigParser()
+
+        try:
+            with open(conf_path) as f:
+                config.read_file(f)
+        except FileNotFoundError:
+            pass
+
+        config["ldnp"] = {
+            "appdir_installed_path": str(self.appdir_installed_path),
+        }
+
+        with open(conf_path, "w") as f:
+            config.write(f)
 
     def create_package(self, out_path: str | os.PathLike):
         # to be implemented by subclasses

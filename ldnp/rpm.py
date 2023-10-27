@@ -149,6 +149,7 @@ class RpmPackager(AbstractPackager):
 
         self.copy_appdir_contents()
         self.copy_data_to_usr()
+        self.write_ldnp_conf()
         self.generate_spec_file()
         self.generate_rpm(out_path)
 

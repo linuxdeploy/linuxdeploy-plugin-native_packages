@@ -82,6 +82,7 @@ class DebPackager(AbstractPackager):
 
         self.copy_appdir_contents()
         self.copy_data_to_usr()
+        self.write_ldnp_conf()
         self.generate_control_file()
         self.generate_shlibs_file()
         self.generate_deb(out_path)
