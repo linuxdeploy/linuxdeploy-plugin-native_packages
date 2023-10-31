@@ -253,7 +253,7 @@ class AbstractPackager:
         except FileNotFoundError:
             pass
 
-        config["ldnp"] = {
+        config["native_packages"] = {
             "appdir_installed_path": str(self.appdir_installed_path),
         }
 
