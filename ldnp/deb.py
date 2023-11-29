@@ -1,4 +1,5 @@
 import glob
+import math
 import os
 
 from pathlib import Path
@@ -28,11 +29,20 @@ class DebPackager(AbstractPackager):
         return DebMetaInfo()
 
     def generate_control_file(self):
-        # this key is optional, however it shouldn't be a big deal to calculate the value
-        installed_size = sum(
-            map(
-                os.path.getsize,
-                glob.glob(str(self.appdir.path) + "/**", recursive=True),
+        def get_size(path: str | os.PathLike):
+            if os.path.islink(path):
+                return 0
+
+            return os.path.getsize(path)
+
+        # this key is optional, however it's not a big deal to calculate the value
+        # https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-installed-size
+        installed_size = math.ceil(
+            sum(
+                map(
+                    get_size,
+                    glob.glob(str(self.appdir.path) + "/**", recursive=True),
+                )
             )
             / 1024
         )
