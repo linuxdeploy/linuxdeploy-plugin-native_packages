@@ -34,6 +34,7 @@ class DebPackager(AbstractPackager):
                 os.path.getsize,
                 glob.glob(str(self.appdir.path) + "/**", recursive=True),
             )
+            / 1024
         )
 
         try:
