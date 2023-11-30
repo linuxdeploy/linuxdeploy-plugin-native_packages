@@ -163,7 +163,7 @@ class AbstractPackager:
                             f"this_dir={shlex.quote(str(self.appdir_installed_path))}",
                             "",
                             "# might be used by some other scripts, generally a good idea to set it",
-                            'APPDIR="this_dir"',
+                            'APPDIR="$this_dir"',
                             "export APPDIR",
                             "",
                             f'script_dir="$APPDIR/apprun-hooks"',
