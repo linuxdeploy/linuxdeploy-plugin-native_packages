@@ -171,7 +171,7 @@ class AbstractPackager:
                             '    for script in "$script_dir"/*; do',
                             "        # some plugins put non-script files in the directory"
                             "        # we do our best to avoid running them by accident",
-                            '        [[ ! -f "$script" ]] && continue',
+                            '        [ ! -f "$script" ] && continue',
                             "",
                             "        # shellcheck disable=SC1090",
                             '        . "$script"',
