@@ -10,7 +10,7 @@ jobs:
     name: Quality Assurance
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
           sudo apt-get install python3.11 python3.11-dev libgpgme-dev
@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get install -y rpm wget git build-essential swig file
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Build AppImage
         run: |
           git config --global --add safe.directory '*'
@@ -37,7 +37,7 @@ jobs:
           # see https://github.com/conda/conda/issues/12250
           ./appimagecraft-x86_64.AppImage -d /tmp/build
       - name: Archive artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: AppImage
           path: linuxdeploy-plugin-native_packages*.AppImage*
@@ -52,7 +52,7 @@ jobs:
       - build-appimage
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
       - name: Inspect directory after downloading artifacts
         run: ls -alFR
       - name: Create release and upload artifacts
