@@ -1,6 +1,7 @@
 import glob
 import math
 import os
+import shutil
 
 from pathlib import Path
 
@@ -71,6 +72,14 @@ class DebPackager(AbstractPackager):
 
         with open(control_path, "w") as f:
             f.write(rendered)
+
+        # support pre/post install hooks
+        extra_debian_files = os.environ.get("LDNP_DEB_EXTRA_DEBIAN_FILES")
+        if extra_debian_files:
+            for path in map(Path, extra_debian_files.split(";")):
+                target_path = debian_dir / path.name
+                logger.info(f"Deploying extra debian file {path} to {target_path}")
+                shutil.copy(path, target_path)
 
     def generate_shlibs_file(self):
         # FIXME: shlibs
