@@ -53,42 +53,55 @@ class AbstractMetaInfo(UserDict):
     def packager_prefix():
         raise NotImplementedError
 
+    def __init__(self):
+        super().__init__()
+
+        # populate internal storage
+        # we do not expect the environment variables to change during this program's runtime
+        # populating the internal storage allows printing the variables, which in turn makes debugging a lot easier
+        env_var_prefix = "LDNP_META_"
+        packager_env_var_prefix = f"{env_var_prefix}{self.packager_prefix()}_"
+
+        name: str
+        value: str
+        for name, value in os.environ.items():
+            if name.startswith(env_var_prefix):
+                # specific packager env var always takes precedence
+                if name.startswith(packager_env_var_prefix):
+                    fixed_name = name.removeprefix(packager_env_var_prefix)
+                else:
+                    fixed_name = name.removeprefix(env_var_prefix)
+
+                self[fixed_name] = value
+
     def __setitem__(self, key, value):
         # we treat all keys as case-insensitive and normalize them to uppercase
         self.data[key.upper()] = value
 
     def __getitem__(self, identifier: str):
-        """
-        Implements the "subscript" operator. Checks the environment for packager-specific and globally set meta info.
-
-        :param identifier: identifier suffix (see class description)
-        :return: value for provided identifier (if available)
-        :raises KeyError: if the requested value is unavailable
-        """
-
         # identifiers are supposed to be case-insensitive within our code (we accept only upper-case env vars)
         identifier = identifier.upper()
 
-        prefix = "LDNP_META"
-
-        global_env_var = f"{prefix}_{identifier}"
-        specific_env_var = f"{prefix}_{self.packager_prefix()}_{identifier.upper()}"
-
         # just needed to be able to rewrite the error message
         try:
-            try:
-                return os.environ[specific_env_var]
-
-            except KeyError:
-                try:
-                    return os.environ[global_env_var]
-
-                except KeyError:
-                    # the KeyError here should propagate to the caller if raised
-                    return self.data[identifier]
+            return self.data[identifier]
 
         except KeyError:
             raise KeyError(f"Could not find {identifier.upper()}")
+
+    # need to overwrite to force use of our __getitem__
+    def get(self, key, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
+    # need to overwrite to force use of our __setitem__
+    def setdefault(self, key, default=None):
+        if key in self:
+            pass
+
+        self[key] = default
 
 
 class AbstractPackager:
