@@ -55,8 +55,8 @@ Suggests: {{ suggestion }}
 {% for suppl in meta_info.get("supplements", "").split() %}
 Supplements: {{ suppl }}
 {% endfor %}
-{% for conflict in meta_info.get("conflicts", "").split() %}
-Enhances: {{ conflict }}
+{% for enhances in meta_info.get("enhances", "").split() %}
+Enhances: {{ enhances }}
 {% endfor %}
 
 %description

@@ -26,7 +26,7 @@ Essential: {{ meta_info["essential"] }}
 Depends: {{ meta_info["depends"] }}
 {%- endif +%}
 {%- if meta_info.get("pre_depends") +%}
-Pre-Depends: {{ meta_info["depends"] }}
+Pre-Depends: {{ meta_info["pre_depends"] }}
 {%- endif +%}
 {%- if meta_info.get("recommends") +%}
 Recommends: {{ meta_info["recommends"] }}
