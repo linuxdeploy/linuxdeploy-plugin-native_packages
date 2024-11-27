@@ -48,12 +48,6 @@ class DebPackager(AbstractPackager):
             / 1024
         )
 
-        try:
-            self.meta_info.get("version")
-            self.meta_info.get("package_name")
-        except KeyError:
-            assert False
-
         # sorting is technically not needed but makes reading and debugging easier
         # note: installed_size is packager specific and must not be overwritten by the user, so we pass it separately
         rendered = jinja_env.get_template("deb/control").render(meta_info=self.meta_info, installed_size=installed_size)
