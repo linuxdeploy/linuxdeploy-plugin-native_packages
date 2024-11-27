@@ -157,6 +157,9 @@ class AbstractPackager:
 
         return files
 
+    def find_binfmt_files(self) -> Iterable[Path]:
+        return self._find_file_paths_in_directory(self.appdir_install_path / AppDir.BINFMT_D_RELATIVE_LOCATION)
+
     def copy_data_to_usr(self):
         def create_relative_symlink(src: Path, dst: Path):
             # to calculate the amount of parent directories we need to move up, we can't use relative_to directly
@@ -266,6 +269,9 @@ class AbstractPackager:
 
         for systemd_file in self.find_systemd_files():
             deploy_file_as_is(systemd_file)
+
+        for binfmt_d_file in self.find_binfmt_files():
+            deploy_file_as_is(binfmt_d_file)
 
     def copy_appdir_contents(self):
         if os.path.exists(self.appdir_install_path):

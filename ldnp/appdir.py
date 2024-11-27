@@ -19,6 +19,7 @@ class AppDir:
     SYSTEMD_RELATIVE_LOCATIONS = [
         "usr/lib/systemd",
     ]
+    BINFMT_D_RELATIVE_LOCATION = "usr/lib/binfmt.d"
 
     def __init__(self, path: str | os.PathLike):
         self.path = Path(path)
