@@ -1,5 +1,5 @@
-Name:       {{ meta_info.get("package_name") | default("ldnp-unknown", true) }}
-Version:    {{ fixed_version | default("0.0.1", true) }}
+Name:       {{ meta_info["package_name"] }}
+Version:    {{ fixed_version }}
 Release:    {{ meta_info.get("release") | default("1", true) }}%{?dist}
 Summary:    {{ meta_info.get("short_description") | default("ldnp-built package", true) }}
 
