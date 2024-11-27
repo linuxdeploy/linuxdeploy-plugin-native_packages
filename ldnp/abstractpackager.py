@@ -149,6 +149,14 @@ class AbstractPackager:
             self.appdir_install_path / AppDir.CLOUDPROVIDERS_FILES_RELATIVE_LOCATION
         )
 
+    def find_systemd_files(self) -> Iterable[Path]:
+        files = []
+
+        for systemd_path in AppDir.SYSTEMD_RELATIVE_LOCATIONS:
+            files += self._find_file_paths_in_directory(self.appdir_install_path / systemd_path)
+
+        return files
+
     def copy_data_to_usr(self):
         def create_relative_symlink(src: Path, dst: Path):
             # to calculate the amount of parent directories we need to move up, we can't use relative_to directly
@@ -255,6 +263,9 @@ class AbstractPackager:
         # same goes for libcloudproviders configuration data, which just describe some D-Bus endpoints
         for cloudproviders_file in self.find_cloudproviders_files():
             deploy_file_as_is(cloudproviders_file)
+
+        for systemd_file in self.find_systemd_files():
+            deploy_file_as_is(systemd_file)
 
     def copy_appdir_contents(self):
         if os.path.exists(self.appdir_install_path):

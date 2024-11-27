@@ -16,6 +16,9 @@ class AppDir:
     ICONS_RELATIVE_LOCATION = "usr/share/icons"
     MIME_FILES_RELATIVE_LOCATION = "usr/share/mime"
     CLOUDPROVIDERS_FILES_RELATIVE_LOCATION = "usr/share/cloud-providers"
+    SYSTEMD_RELATIVE_LOCATIONS = [
+        "usr/lib/systemd",
+    ]
 
     def __init__(self, path: str | os.PathLike):
         self.path = Path(path)
