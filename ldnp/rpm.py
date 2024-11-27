@@ -2,6 +2,7 @@ import glob
 import os
 import shutil
 from pathlib import Path
+from typing import List
 
 import gnupg
 
@@ -40,6 +41,25 @@ class RpmMetaInfo(AbstractMetaInfo):
     @staticmethod
     def packager_prefix():
         return "RPM"
+
+
+class Scriptlet:
+    @staticmethod
+    def _extract_shebang(data: str):
+        first_line = data.splitlines()[0]
+
+        if first_line[:2] != "#!":
+            return None
+
+        return first_line[2:]
+
+    def __init__(self, type: str, source_file: str):
+        self.type = type
+
+        with open(source_file) as f:
+            self.content = f.read()
+
+        self.shebang = Scriptlet._extract_shebang(self.content)
 
 
 class RpmPackager(AbstractPackager):
@@ -96,10 +116,22 @@ class RpmPackager(AbstractPackager):
         if fixed_version != version:
             logger.warning(f"version number {version} incompatible, changed to: {fixed_version}")
 
+        scriptlets: List[Scriptlet] = []
+
+        for scriptlet_type in ["pretrans", "pre", "post", "preun", "postun", "posttrans"]:
+            scriptlet_path = os.environ.get(f"LDNP_RPM_SCRIPTLET_{scriptlet_type}")
+
+            if scriptlet_path:
+                logger.info(f"Found scriptlet of type {scriptlet_type} at {scriptlet_path}")
+                scriptlets.append(Scriptlet(scriptlet_type, scriptlet_path))
+
         # sorting is technically not needed but makes reading and debugging easier
         # note: fixed_version is packager-specific, so we pass it separately
         rendered = jinja_env.get_template("rpm/spec").render(
-            files=list(sorted(files)), meta_info=self.meta_info, fixed_version=fixed_version
+            files=list(sorted(files)),
+            meta_info=self.meta_info,
+            fixed_version=fixed_version,
+            scriptlets=scriptlets,
         )
 
         with open(self.context.work_dir / "package.spec", "w") as f:

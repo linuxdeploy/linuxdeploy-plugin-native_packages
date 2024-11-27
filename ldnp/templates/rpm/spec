@@ -79,3 +79,8 @@ cp -rfa %{_install_root}/* %{buildroot}
 {%- for file in files %}
 {{ file }}
 {%- endfor %}
+
+{% for script_type in scriptlets %}
+%{{ scriptlet.type }} -p {{ scriptlet.shebang }}
+{{ scriptlet.content }}
+{% endfor %}
