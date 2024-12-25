@@ -72,7 +72,8 @@ true
 
 %install
 # variable is defined during rpmbuild call and points to the temporary install root dir in the context
-cp -rfa %{_install_root}/* %{buildroot}
+mkdir -p %{buildroot}/
+cp -rfa %{_install_root}/* %{buildroot}/
 
 %files
 # install all the files we just copied
