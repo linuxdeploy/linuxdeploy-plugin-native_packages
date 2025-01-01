@@ -174,10 +174,20 @@ class RpmPackager(AbstractPackager):
         shutil.move(built_rpms[0], out_path)
 
     def create_package(self, out_path: str | os.PathLike):
+        logger.info(f"Creating RPM package called {out_path}")
+
         extension = ".rpm"
 
-        if not str(out_path).endswith(extension):
-            out_path = Path(f"{out_path}{extension}")
+        # remove extension temporarily so we can insert the build architecture (if needed)
+        out_path = str(out_path).removesuffix(extension)
+
+        build_arch = self.meta_info.get("build_arch")
+
+        if build_arch:
+            out_path += f"_{build_arch}"
+
+        # (re-)add extension which either was lacking all the time or has been removed earlier
+        out_path += extension
 
         self.copy_appdir_contents()
         self.copy_data_to_usr()

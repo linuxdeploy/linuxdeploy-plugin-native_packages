@@ -91,8 +91,16 @@ class DebPackager(AbstractPackager):
 
         extension = ".deb"
 
-        if not str(out_path).endswith(extension):
-            out_path = Path(f"{out_path}{extension}")
+        # remove extension temporarily so we can insert the build architecture (if needed)
+        out_path = str(out_path).removesuffix(extension)
+
+        architecture = self.meta_info.get("architecture")
+
+        if architecture:
+            out_path += f"_{architecture}"
+
+        # (re-)add extension which either was lacking all the time or has been removed earlier
+        out_path += extension
 
         self.copy_appdir_contents()
         self.copy_data_to_usr()
