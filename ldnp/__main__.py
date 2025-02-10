@@ -147,7 +147,7 @@ def main(
 
             assert Path(out_name).is_file()
 
-            logger.info(f"Build package {out_path}")
+            logger.info(f"Built package {out_path}")
 
             if sign:
                 logger.info(f"Signing package {out_path}")
