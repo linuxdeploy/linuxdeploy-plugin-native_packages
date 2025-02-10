@@ -137,7 +137,7 @@ class RpmPackager(AbstractPackager):
         with open(self.context.work_dir / "package.spec", "w") as f:
             f.write(rendered)
 
-    def generate_rpm(self, out_path: str):
+    def generate_rpm(self, out_path: str, build_arch: str):
         run_command(
             [
                 "rpmbuild",
@@ -158,6 +158,10 @@ class RpmPackager(AbstractPackager):
                 "--define",
                 "_build_id_links none",
                 "-bb",
+                # specify target explicitly to work around some bug in newer rpmbuild versions
+                # "error: No compatible architectures found for build"
+                "--target",
+                build_arch,
                 "package.spec",
             ],
             cwd=self.context.work_dir,
@@ -193,7 +197,7 @@ class RpmPackager(AbstractPackager):
         self.copy_data_to_usr()
         self.write_ldnp_conf()
         self.generate_spec_file()
-        self.generate_rpm(out_path)
+        self.generate_rpm(out_path, build_arch)
 
         return out_path
 
