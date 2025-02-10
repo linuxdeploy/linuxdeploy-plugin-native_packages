@@ -6,10 +6,6 @@ Summary:    {{ meta_info.get("short_description") | default("ldnp-built package"
 Group:      {{ meta_info.get("group") | default("System Environment/Base", true) }}
 License: {{ meta_info.get("license") | default("unknown") }}
 
-{% if meta_info.get("build_arch") %}
-BuildArch:  {{ meta_info["build_arch"] }}
-{% endif %}
-
 {% if meta_info.get("url") %}
 URL: {{ meta_info["url"] }}
 {% endif %}
