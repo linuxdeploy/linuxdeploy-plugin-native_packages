@@ -13,8 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
-          sudo apt-get install python3.11 python3.11-dev libgpgme-dev
-          pip install poetry
+          sudo apt-get install python3-poetry libgpgme-dev
           poetry install
       - name: Check code formatting with black
         run: poetry run black --check ldnp/
