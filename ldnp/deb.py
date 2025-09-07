@@ -84,7 +84,9 @@ class DebPackager(AbstractPackager):
 
     def generate_deb(self, out_path: str):
         logger.info(f"Generating .deb package called {out_path}")
-        run_command(["dpkg-deb", "-Zxz", "-b", self.context.install_root_dir, out_path])
+        # make sure all files are owned by root
+        # see https://github.com/TheAssassin/AppImageLauncher/issues/723#issuecomment-3222120069
+        run_command(["dpkg-deb", "-Zxz", "--root-owner-group", "-b", self.context.install_root_dir, out_path])
 
     def create_package(self, out_path: str | os.PathLike):
         logger.info(f"Creating Debian package called {out_path}")
