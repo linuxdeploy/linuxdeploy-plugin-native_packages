@@ -10,7 +10,7 @@ jobs:
     name: Quality Assurance
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install dependencies
         run: |
           sudo apt-get install python3-poetry libgpgme-dev
@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get install -y rpm wget git build-essential swig file
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build AppImage
         run: |
           git config --global --add safe.directory '*'
