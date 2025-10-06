@@ -18,7 +18,7 @@ colorama = "^0.4.6"
 
 [tool.poetry.group.dev.dependencies]
 black = {extras = ["d"], version = "^25.1.0"}
-isort = "^6.0.1"
+isort = "^6.1.0"
 
 [tool.poetry.scripts]
 linuxdeploy-plugin-native_packages = "ldnp.__main__:main"
