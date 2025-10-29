@@ -5,7 +5,7 @@ Package: {{ meta_info["package_name"] }}
 Version: {{ meta_info["version"] }}
 Architecture: {{ meta_info.get("architecture") | default("all", true) }}
 Maintainer: {{ meta_info.get("maintainer") | default("ldnp <ldnp@ldnp>", true) }}
-Description: {{ meta_info.get("description") | default(meta_info.get("short_description")) | default("ldnp-built package", true) }}
+Description: {{ meta_info.get("description") | default(meta_info.get("short_description")) | default("Package built by linuxdeploy-plugin-native_packages", true) }}
 
 {# recommended values #}
 Section: {{ meta_info.get("section") | default("misc", true) }}
