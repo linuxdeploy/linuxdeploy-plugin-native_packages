@@ -36,7 +36,7 @@ jobs:
           # see https://github.com/conda/conda/issues/12250
           ./appimagecraft-x86_64.AppImage -d /tmp/build
       - name: Archive artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: AppImage
           path: linuxdeploy-plugin-native_packages*.AppImage*
