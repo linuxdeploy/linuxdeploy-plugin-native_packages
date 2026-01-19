@@ -16,7 +16,7 @@ jobs:
           sudo apt-get install python3-poetry libgpgme-dev
           poetry install
       - name: Check code formatting with black
-        run: poetry run black --check ldnp/
+        run: poetry run black --check --diff ldnp/
 
   build-appimage:
     name: Build AppImage
