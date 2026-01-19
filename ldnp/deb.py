@@ -10,7 +10,6 @@ from .templating import jinja_env
 from .util import run_command
 from .logging import get_logger
 
-
 logger = get_logger("deb")
 
 
